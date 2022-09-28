@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysStudentMapper">
+    <resultMap type="SysStudent" id="SysStudentResult">
+        <id     property="studentId"       column="student_id"      />
+        <result property="deptId"       column="dept_id"      />
+        <result property="userName"     column="user_name"    />
+        <result property="phonenumber"  column="phonenumber"  />
+        <result property="sex"          column="sex"          />
+        <result property="healthStatus"     column="health_status"    />
+        <result property="testingResult"   column="testing_result"  />
+        <result property="outTime"     column="out_time"    />
+        <result property="backTime"   column="back_time"  />
+        <result property="journeyRecord"       column="journey_record"       />
+    </resultMap>
+
+    <resultMap id="deptResult" type="SysDept">
+        <id     property="deptId"    column="dept_id"     />
+        <result property="parentId"  column="parent_id"   />
+        <result property="deptName"  column="dept_name"   />
+        <result property="ancestors" column="ancestors"   />
+        <result property="orderNum"  column="order_num"   />
+        <result property="leader"    column="leader"      />
+        <result property="status"    column="dept_status" />
+    </resultMap>
+
+    <resultMap id="RoleResult" type="SysRole">
+        <id     property="roleId"       column="role_id"        />
+        <result property="roleName"     column="role_name"      />
+        <result property="roleKey"      column="role_key"       />
+        <result property="roleSort"     column="role_sort"      />
+        <result property="dataScope"     column="data_scope"    />
+        <result property="status"       column="role_status"    />
+    </resultMap>
+    <insert id="insertStudent" parameterType="SysStudent">
+        insert into
+        sys_student
+        (student_id, dept_id, user_name, phonenumber, sex,health_status, testing_result, out_time, back_time, journey_record)
+        VALUES (#{studentId},#{deptId},#{userName},#{phonenumber},#{sex},#{healthStatus},#{testingResult},#{outTime},#{backTime},#{journeyRecord})
+    </insert>
+
+
+    <select id="selectStudentById" parameterType="Long" resultMap="SysStudentResult">
+        select *
+        from sys_student
+        where student_id = #{studentId}
+    </select>
+    <update id="updateStudent" parameterType="SysStudent">
+        update sys_student
+        <set>
+         student_id=#{studentId},
+         dept_id=#{deptId},
+         user_name=#{userName},
+         phonenumber=#{phonenumber},
+         sex=#{sex},
+         health_status=#{healthStatus},
+         testing_result=#{testingResult},
+         out_time=#{outTime},
+         back_time=#{backTime},
+         journey_record=#{journeyRecord}
+        </set>
+        where student_id = #{studentId}
+    </update>
+    <delete id="deleteStudent" parameterType="Long">
+        DELETE FROM sys_student where student_id in
+        <foreach collection="array" item="roleId" open="(" separator="," close=")">
+            #{studentId}
+        </foreach>
+    </delete>
+    <select id="selectStuList" resultMap="SysStudentResult" parameterType="SysStudent">
+       select student_id, dept_id, user_name, phonenumber, sex, health_status, testing_result, out_time, back_time, journey_record, dept_id, parent_id, ancestors, dept_name, order_num, leader, phone, email, status, del_flag, create_by, create_time, update_by, update_time,
+        d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.status as dept_status,
+       from sys_student u
+       left join sys_dept d on u.dept_id = d.dept_id
+       where 1=1
+        <if test="healthStatus != null and healthStatus != ''">
+            AND u.healthStatus = #{healthStatus}
+        </if>
+        ${params.dataScope}
+    </select>
+</mapper>
